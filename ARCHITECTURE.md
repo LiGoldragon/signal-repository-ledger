@@ -13,6 +13,8 @@ registration, hook policy, and mirror configuration live in
 - `RepositoryReceiveHookNotification`, matching the current Gitolite
   `post-receive` hook spool record.
 - Repository/ref identity newtypes.
+- `RepositoryLedgerDaemonConfiguration`, the typed startup record for the
+  daemon's ordinary socket, owner socket, store, and spool directory.
 - Read query payloads for recent repository events and registered repositories.
 - Ordinary request/reply variants declared with `signal_channel!`.
 
@@ -29,3 +31,5 @@ registration, hook policy, and mirror configuration live in
 - Hook notifications are `Assert`: they introduce a new event fact.
 - Read queries are `Match`.
 - Contract records stay domain-specific and runtime-free.
+- Daemon configuration is a typed contract record, not CLI flags or environment
+  variables on the production launch path.

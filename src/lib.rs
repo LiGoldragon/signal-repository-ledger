@@ -132,6 +132,45 @@ impl RepositoryQueryLimit {
     }
 }
 
+#[derive(
+    Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
+)]
+pub struct RepositoryLedgerPath(String);
+
+impl RepositoryLedgerPath {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(
+    Archive,
+    RkyvSerialize,
+    RkyvDeserialize,
+    NotaTransparent,
+    Debug,
+    Clone,
+    Copy,
+    PartialEq,
+    Eq,
+    Hash,
+)]
+pub struct RepositoryLedgerSocketMode(u32);
+
+impl RepositoryLedgerSocketMode {
+    pub const fn new(value: u32) -> Self {
+        Self(value)
+    }
+
+    pub const fn into_u32(self) -> u32 {
+        self.0
+    }
+}
+
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, PartialEq, Eq)]
 pub enum RepositoryClass {
     RuntimeComponent,
@@ -194,6 +233,18 @@ pub struct RepositoryCatalogQuery;
 pub struct RepositoryCatalogListing {
     pub repositories: Vec<RepositoryRegistration>,
 }
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryLedgerDaemonConfiguration {
+    pub ordinary_socket_path: RepositoryLedgerPath,
+    pub ordinary_socket_mode: RepositoryLedgerSocketMode,
+    pub owner_socket_path: RepositoryLedgerPath,
+    pub owner_socket_mode: RepositoryLedgerSocketMode,
+    pub store_path: RepositoryLedgerPath,
+    pub spool_directory: RepositoryLedgerPath,
+}
+
+nota_config::impl_rkyv_configuration!(RepositoryLedgerDaemonConfiguration);
 
 #[derive(
     Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, Copy, PartialEq, Eq, Hash,
