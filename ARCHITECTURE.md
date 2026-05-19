@@ -4,37 +4,30 @@
 submissions and read queries.
 
 It is called by trusted local peers that can submit repository-receive
-notifications or ask for repository ledger state. Privileged repository
-registration, hook policy, and mirror configuration live in
-`owner-signal-repository-ledger`.
+notifications, submit direct push observations, or ask for repository
+ledger state. Privileged repository registration, hook policy, and
+mirror configuration live in `owner-signal-repository-ledger`.
 
-## MUST IMPLEMENT — signal architecture migration
+## Migration history — contract-local operations (2026-05-19)
 
-This contract is migrating to contract-local verbs per
-`primary/reports/designer/238-signal-architecture-redirection-contract-local-verbs.md`
-and `primary/reports/designer/239-signal-architecture-migration-plan.md`.
+This crate is the pilot contract for the migration from public
+`signal-core` Sema verbs to `signal-frame` contract-local operation
+roots.
 
-This crate is the named pilot for the migration. Drop the five
-`Match *Query` variants (`EventQuery`, `RecentRepositoriesQuery`,
-`ChangedFileQuery`, `CommitMessageQuery`, `CatalogQuery`); lift `Query`
-to a contract-local operation root whose payload is a closed `Query`
-enum naming the read targets (`Events`, `RecentRepositories`,
-`ChangedFiles`, `CommitMessages`, `Catalog`). Replace the two
-`Assert` variants (`ReceiveHookNotification`, `PushObservation`) with
-contract-local verbs on the assertion side — `Receive` for the
-hook-spool notification and `Observe` (or another verb-form word
-chosen during implementation) for the direct push observation.
-Replace the `Match`/`Assert` SignalVerb declarations in
-`signal_channel!` with `operation <Verb>(<Payload>)` shapes; move the
-daemon's verb-to-Sema lowering (`Query` → `Match` over indexes,
-`Receive`/`Observe` → `Assert` event rows) into the runtime executor.
+The public request surface is now:
 
-References: `primary/reports/designer/238-signal-architecture-redirection-contract-local-verbs.md`,
-`primary/reports/designer/239-signal-architecture-migration-plan.md`.
+- `Receive(ReceiveHookNotification)` — a Gitolite hook fallback spool
+  notification reached the ordinary daemon.
+- `Observe(PushObservation)` — the caller observed a repository push
+  and submits the typed commits and file changes.
+- `Query(Query)` — the caller asks for ledger state. The payload is a
+  closed `Query` sum with read targets:
+  `Events`, `RecentRepositories`, `ChangedFiles`, `CommitMessages`,
+  and `Catalog`.
 
-**Note to remover:** when the refactor lands, remove this section and
-add a `## Migration history — contract-local verbs (2026-05-XX)`
-paragraph noting the shape change.
+There is no public `Assert` / `Match` tag in this contract. The daemon
+executor lowers these contract-local operations to Sema effects when
+it mutates or reads its own durable tables.
 
 ## Owns
 
@@ -45,11 +38,11 @@ paragraph noting the shape change.
 - Repository/ref identity newtypes.
 - `DaemonConfiguration`, the typed startup record for the
   daemon's ordinary socket, owner socket, store, and spool directory.
-- Read query payloads for recent repository events and registered repositories.
-- Read query payloads for agent-facing discovery:
-  `RecentRepositoriesQuery`, `ChangedFileQuery`, and
-  `CommitMessageQuery`.
-- Ordinary request/reply variants declared with `signal_channel!`.
+- Closed `Query` payload for repository event and repository catalog
+  reads.
+- Read payloads for agent-facing discovery:
+  `RecentRepositories`, `ChangedFiles`, and `CommitMessages`.
+- Ordinary operation/reply variants declared with `signal_channel!`.
 
 ## Does Not Own
 
@@ -60,11 +53,14 @@ paragraph noting the shape change.
 
 ## Constraints
 
-- Every request variant declares one of the six `signal-core` verbs.
-- Hook notifications are `Assert`: they introduce a new event fact.
-- Push observations are `Assert`: they introduce one push event plus zero or
-  more commit/file observations.
-- Read queries are `Match`.
+- Public operation roots are contract-local verbs. They do not expose
+  `Assert`, `Mutate`, `Retract`, `Match`, `Subscribe`, or `Validate`.
+- `Receive` introduces a hook-notification fact when accepted by the
+  daemon.
+- `Observe` introduces one push event plus zero or more commit/file
+  observations when accepted by the daemon.
+- `Query` reads ledger state; the daemon decides the Sema read plan.
+- Sema lowering belongs to the daemon executor, not this contract.
 - Query text matching is ordinary substring matching over typed fields. The
   first implementation is case-insensitive so agents can search commit messages
   without knowing exact capitalization.
@@ -74,10 +70,10 @@ paragraph noting the shape change.
 
 ## Pseudo-NOTA Schema
 
-Direct hook submission:
+Direct push observation:
 
 ```nota
-(PushObservation
+(Observe (PushObservation
   (ReceiveHookNotification
     "repository-ledger"
     "gitolite-admin"
@@ -90,29 +86,25 @@ Direct hook submission:
       "2026-05-19T14:07:36+00:00"
       "add repository query surface\n\nLonger commit message body."
       [(FileChange "M" "src/lib.rs" None)
-       (FileChange "R100" "src/new.rs" (Some "src/old.rs"))])])
+       (FileChange "R100" "src/new.rs" "src/old.rs")])]))
 ```
 
 Agent discovery queries:
 
 ```nota
-(RecentRepositoriesQuery (Some "20260519T000000Z") 20)
+(Query (RecentRepositories "20260519T000000Z" 20))
 
-(ChangedFileQuery
-  (Some "repository-ledger")
-  (Some "20260519T000000Z")
-  (Some "20260519T235959Z")
-  (Some "src")
-  50)
+(Query (ChangedFiles
+  "repository-ledger"
+  "20260519T000000Z"
+  "20260519T235959Z"
+  "src"
+  50))
 
-(CommitMessageQuery
+(Query (CommitMessages
   None
   None
   None
   (Some "query surface")
-  50)
+  50))
 ```
-
-These are the canonical record shapes. The current generated channel request
-CLI surface still accepts present optional fields as bare values; that is a
-`signal_channel!` syntax gap, not the contract's desired record grammar.

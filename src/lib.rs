@@ -3,9 +3,9 @@
 //! This crate carries peer-callable repository event submissions and read
 //! queries. Owner-only configuration lives in `owner-signal-repository-ledger`.
 
-use nota_codec::{NotaEnum, NotaRecord, NotaTransparent};
+use nota_codec::{NotaEnum, NotaRecord, NotaSum, NotaTransparent};
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
-use signal_core::signal_channel;
+use signal_frame::signal_channel;
 
 #[derive(
     Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
@@ -297,7 +297,7 @@ pub struct EventRecorded {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct EventQuery {
+pub struct Events {
     pub repository_name: Option<Name>,
     pub since_sequence: Option<EventSequence>,
     pub limit: QueryLimit,
@@ -309,7 +309,7 @@ pub struct EventListing {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct RecentRepositoriesQuery {
+pub struct RecentRepositories {
     pub since_received_at: Option<Timestamp>,
     pub limit: QueryLimit,
 }
@@ -328,7 +328,7 @@ pub struct RecentRepositoriesListing {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct ChangedFileQuery {
+pub struct ChangedFiles {
     pub repository_name: Option<Name>,
     pub since_received_at: Option<Timestamp>,
     pub until_received_at: Option<Timestamp>,
@@ -354,7 +354,7 @@ pub struct ChangedFileListing {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct CommitMessageQuery {
+pub struct CommitMessages {
     pub repository_name: Option<Name>,
     pub since_received_at: Option<Timestamp>,
     pub until_received_at: Option<Timestamp>,
@@ -379,11 +379,32 @@ pub struct CommitListing {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
-pub struct CatalogQuery;
+pub struct Catalog;
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct CatalogListing {
     pub repositories: Vec<Registration>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaSum, Debug, Clone, PartialEq, Eq)]
+pub enum Query {
+    Events(Events),
+    RecentRepositories(RecentRepositories),
+    ChangedFiles(ChangedFiles),
+    CommitMessages(CommitMessages),
+    Catalog(Catalog),
+}
+
+impl Query {
+    pub fn kind(&self) -> QueryKind {
+        match self {
+            Self::Events(_) => QueryKind::Events,
+            Self::RecentRepositories(_) => QueryKind::RecentRepositories,
+            Self::ChangedFiles(_) => QueryKind::ChangedFiles,
+            Self::CommitMessages(_) => QueryKind::CommitMessages,
+            Self::Catalog(_) => QueryKind::Catalog,
+        }
+    }
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
@@ -402,13 +423,20 @@ nota_config::impl_rkyv_configuration!(DaemonConfiguration);
     Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, Copy, PartialEq, Eq, Hash,
 )]
 pub enum OperationKind {
-    ReceiveHookNotification,
-    PushObservation,
-    EventQuery,
-    RecentRepositoriesQuery,
-    ChangedFileQuery,
-    CommitMessageQuery,
-    CatalogQuery,
+    Receive,
+    Observe,
+    Query,
+}
+
+#[derive(
+    Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, Copy, PartialEq, Eq, Hash,
+)]
+pub enum QueryKind {
+    Events,
+    RecentRepositories,
+    ChangedFiles,
+    CommitMessages,
+    Catalog,
 }
 
 #[derive(
@@ -423,29 +451,24 @@ pub enum UnimplementedReason {
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct RequestUnimplemented {
     pub operation: OperationKind,
+    pub query: Option<QueryKind>,
     pub reason: UnimplementedReason,
 }
 
 signal_channel! {
     channel Ledger {
-        request Request {
-            Assert ReceiveHookNotification(ReceiveHookNotification),
-            Assert PushObservation(PushObservation),
-            Match EventQuery(EventQuery),
-            Match RecentRepositoriesQuery(RecentRepositoriesQuery),
-            Match ChangedFileQuery(ChangedFileQuery),
-            Match CommitMessageQuery(CommitMessageQuery),
-            Match CatalogQuery(CatalogQuery),
-        }
-        reply Reply {
-            EventRecorded(EventRecorded),
-            EventListing(EventListing),
-            RecentRepositoriesListing(RecentRepositoriesListing),
-            ChangedFileListing(ChangedFileListing),
-            CommitListing(CommitListing),
-            CatalogListing(CatalogListing),
-            RequestUnimplemented(RequestUnimplemented),
-        }
+        operation Receive(ReceiveHookNotification),
+        operation Observe(PushObservation),
+        operation Query(Query),
+    }
+    reply Reply {
+        EventRecorded(EventRecorded),
+        EventListing(EventListing),
+        RecentRepositoriesListing(RecentRepositoriesListing),
+        ChangedFileListing(ChangedFileListing),
+        CommitListing(CommitListing),
+        CatalogListing(CatalogListing),
+        RequestUnimplemented(RequestUnimplemented),
     }
 }
 
@@ -454,17 +477,14 @@ pub type FrameBody = LedgerFrameBody;
 pub type ChannelRequest = LedgerChannelRequest;
 pub type ChannelReply = LedgerChannelReply;
 pub type RequestBuilder = LedgerRequestBuilder;
+pub type Request = LedgerOperation;
 
-impl Request {
+impl LedgerOperation {
     pub fn operation_kind(&self) -> OperationKind {
         match self {
-            Self::ReceiveHookNotification(_) => OperationKind::ReceiveHookNotification,
-            Self::PushObservation(_) => OperationKind::PushObservation,
-            Self::EventQuery(_) => OperationKind::EventQuery,
-            Self::RecentRepositoriesQuery(_) => OperationKind::RecentRepositoriesQuery,
-            Self::ChangedFileQuery(_) => OperationKind::ChangedFileQuery,
-            Self::CommitMessageQuery(_) => OperationKind::CommitMessageQuery,
-            Self::CatalogQuery(_) => OperationKind::CatalogQuery,
+            Self::Receive(_) => OperationKind::Receive,
+            Self::Observe(_) => OperationKind::Observe,
+            Self::Query(_) => OperationKind::Query,
         }
     }
 }

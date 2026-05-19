@@ -1,45 +1,77 @@
-use signal_core::{RequestPayload, SignalVerb};
+use signal_frame::RequestPayload;
 use signal_repository_ledger::{
-    CatalogQuery, ChangedFileQuery, CommitMessageQuery, DaemonConfiguration, EventQuery,
-    FilesystemPath, Name, QueryLimit, RecentRepositoriesQuery, Request, SocketMode, TextSearch,
-    Timestamp,
+    Catalog, ChangedFiles, CommitMessages, DaemonConfiguration, Events, FilesystemPath, Name,
+    OperationKind, Query, QueryKind, QueryLimit, RecentRepositories, Request, SocketMode,
+    TextSearch, Timestamp,
 };
 
 #[test]
-fn request_variants_declare_expected_signal_verbs() {
-    let query = Request::EventQuery(EventQuery {
+fn operations_are_contract_local_without_signal_verbs() {
+    let query = Request::Query(Query::Events(Events {
         repository_name: Some(Name::new("repository-ledger")),
         since_sequence: None,
         limit: QueryLimit::new(16),
-    });
-    assert_eq!(query.signal_verb(), SignalVerb::Match);
+    }));
+    assert_eq!(query.operation_kind(), OperationKind::Query);
+    assert_eq!(
+        query.kind(),
+        signal_repository_ledger::LedgerOperationKind::Query
+    );
 
-    let catalog = Request::CatalogQuery(CatalogQuery);
-    assert_eq!(catalog.signal_verb(), SignalVerb::Match);
+    let catalog = Query::Catalog(Catalog);
+    assert_eq!(catalog.kind(), QueryKind::Catalog);
 
-    let recent = Request::RecentRepositoriesQuery(RecentRepositoriesQuery {
+    let recent = Query::RecentRepositories(RecentRepositories {
         since_received_at: Some(Timestamp::new("20260519T000000Z")),
         limit: QueryLimit::new(16),
     });
-    assert_eq!(recent.signal_verb(), SignalVerb::Match);
+    assert_eq!(recent.kind(), QueryKind::RecentRepositories);
 
-    let files = Request::ChangedFileQuery(ChangedFileQuery {
+    let files = Query::ChangedFiles(ChangedFiles {
         repository_name: Some(Name::new("repository-ledger")),
         since_received_at: None,
         until_received_at: None,
         path_contains: Some(TextSearch::new("src")),
         limit: QueryLimit::new(16),
     });
-    assert_eq!(files.signal_verb(), SignalVerb::Match);
+    assert_eq!(files.kind(), QueryKind::ChangedFiles);
 
-    let messages = Request::CommitMessageQuery(CommitMessageQuery {
+    let messages = Query::CommitMessages(CommitMessages {
         repository_name: None,
         since_received_at: None,
         until_received_at: None,
         message_contains: Some(TextSearch::new("query")),
         limit: QueryLimit::new(16),
     });
-    assert_eq!(messages.signal_verb(), SignalVerb::Match);
+    assert_eq!(messages.kind(), QueryKind::CommitMessages);
+}
+
+#[test]
+fn query_operation_round_trips_through_nota() {
+    use nota_codec::{Decoder, Encoder, NotaDecode, NotaEncode};
+
+    let operation = Request::Query(Query::RecentRepositories(RecentRepositories {
+        since_received_at: Some(Timestamp::new("20260519T000000Z")),
+        limit: QueryLimit::new(16),
+    }));
+
+    let mut encoder = Encoder::new();
+    operation.encode(&mut encoder).expect("encode");
+    let text = encoder.into_string();
+
+    assert_eq!(text, "(Query (RecentRepositories \"20260519T000000Z\" 16))");
+
+    let mut decoder = Decoder::new(&text);
+    let decoded = Request::decode(&mut decoder).expect("decode");
+    assert_eq!(decoded, operation);
+}
+
+#[test]
+fn query_operation_builds_single_signal_frame_request() {
+    let operation = Request::Query(Query::Catalog(Catalog));
+    let request = operation.into_request();
+
+    assert_eq!(request.operations().len(), 1);
 }
 
 #[test]
