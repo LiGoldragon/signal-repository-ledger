@@ -10,17 +10,17 @@ registration, hook policy, and mirror configuration live in
 
 ## Owns
 
-- `RepositoryReceiveHookNotification`, matching the current Gitolite
+- `ReceiveHookNotification`, matching the current Gitolite
   `post-receive` hook fallback spool record.
-- `RepositoryPushObservation`, the direct hook-to-ledger submission record. It
+- `PushObservation`, the direct hook-to-ledger submission record. It
   wraps the push notification plus per-commit observations and per-file changes.
 - Repository/ref identity newtypes.
-- `RepositoryLedgerDaemonConfiguration`, the typed startup record for the
+- `DaemonConfiguration`, the typed startup record for the
   daemon's ordinary socket, owner socket, store, and spool directory.
 - Read query payloads for recent repository events and registered repositories.
 - Read query payloads for agent-facing discovery:
-  `RepositoryRecentRepositoriesQuery`, `RepositoryChangedFileQuery`, and
-  `RepositoryCommitMessageQuery`.
+  `RecentRepositoriesQuery`, `ChangedFileQuery`, and
+  `CommitMessageQuery`.
 - Ordinary request/reply variants declared with `signal_channel!`.
 
 ## Does Not Own
@@ -49,35 +49,35 @@ registration, hook policy, and mirror configuration live in
 Direct hook submission:
 
 ```nota
-(RepositoryPushObservation
-  (RepositoryReceiveHookNotification
+(PushObservation
+  (ReceiveHookNotification
     "repository-ledger"
     "gitolite-admin"
     "20260519T140736Z"
     true
     [(RefUpdate "old-commit" "new-commit" "refs/heads/main")])
-  [(RepositoryCommitObservation
+  [(CommitObservation
       "new-commit"
       "refs/heads/main"
       "2026-05-19T14:07:36+00:00"
       "add repository query surface\n\nLonger commit message body."
-      [(RepositoryFileChange "M" "src/lib.rs" None)
-       (RepositoryFileChange "R100" "src/new.rs" (Some "src/old.rs"))])])
+      [(FileChange "M" "src/lib.rs" None)
+       (FileChange "R100" "src/new.rs" (Some "src/old.rs"))])])
 ```
 
 Agent discovery queries:
 
 ```nota
-(RepositoryRecentRepositoriesQuery (Some "20260519T000000Z") 20)
+(RecentRepositoriesQuery (Some "20260519T000000Z") 20)
 
-(RepositoryChangedFileQuery
+(ChangedFileQuery
   (Some "repository-ledger")
   (Some "20260519T000000Z")
   (Some "20260519T235959Z")
   (Some "src")
   50)
 
-(RepositoryCommitMessageQuery
+(CommitMessageQuery
   None
   None
   None
