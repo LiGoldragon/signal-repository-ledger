@@ -8,6 +8,34 @@ notifications or ask for repository ledger state. Privileged repository
 registration, hook policy, and mirror configuration live in
 `owner-signal-repository-ledger`.
 
+## MUST IMPLEMENT — signal architecture migration
+
+This contract is migrating to contract-local verbs per
+`primary/reports/designer/238-signal-architecture-redirection-contract-local-verbs.md`
+and `primary/reports/designer/239-signal-architecture-migration-plan.md`.
+
+This crate is the named pilot for the migration. Drop the five
+`Match *Query` variants (`EventQuery`, `RecentRepositoriesQuery`,
+`ChangedFileQuery`, `CommitMessageQuery`, `CatalogQuery`); lift `Query`
+to a contract-local operation root whose payload is a closed `Query`
+enum naming the read targets (`Events`, `RecentRepositories`,
+`ChangedFiles`, `CommitMessages`, `Catalog`). Replace the two
+`Assert` variants (`ReceiveHookNotification`, `PushObservation`) with
+contract-local verbs on the assertion side — `Receive` for the
+hook-spool notification and `Observe` (or another verb-form word
+chosen during implementation) for the direct push observation.
+Replace the `Match`/`Assert` SignalVerb declarations in
+`signal_channel!` with `operation <Verb>(<Payload>)` shapes; move the
+daemon's verb-to-Sema lowering (`Query` → `Match` over indexes,
+`Receive`/`Observe` → `Assert` event rows) into the runtime executor.
+
+References: `primary/reports/designer/238-signal-architecture-redirection-contract-local-verbs.md`,
+`primary/reports/designer/239-signal-architecture-migration-plan.md`.
+
+**Note to remover:** when the refactor lands, remove this section and
+add a `## Migration history — contract-local verbs (2026-05-XX)`
+paragraph noting the shape change.
+
 ## Owns
 
 - `ReceiveHookNotification`, matching the current Gitolite
