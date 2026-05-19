@@ -83,6 +83,66 @@ impl RepositoryTimestamp {
 }
 
 #[derive(
+    Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
+)]
+pub struct RepositoryCommitMessage(String);
+
+impl RepositoryCommitMessage {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(
+    Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
+)]
+pub struct RepositoryFilePath(String);
+
+impl RepositoryFilePath {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(
+    Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
+)]
+pub struct RepositoryFileStatus(String);
+
+impl RepositoryFileStatus {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(
+    Archive, RkyvSerialize, RkyvDeserialize, NotaTransparent, Debug, Clone, PartialEq, Eq, Hash,
+)]
+pub struct RepositoryTextSearch(String);
+
+impl RepositoryTextSearch {
+    pub fn new(value: impl Into<String>) -> Self {
+        Self(value.into())
+    }
+
+    pub fn as_str(&self) -> &str {
+        &self.0
+    }
+}
+
+#[derive(
     Archive,
     RkyvSerialize,
     RkyvDeserialize,
@@ -198,6 +258,28 @@ pub struct RepositoryReceiveHookNotification {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryFileChange {
+    pub status: RepositoryFileStatus,
+    pub path: RepositoryFilePath,
+    pub old_path: Option<RepositoryFilePath>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryCommitObservation {
+    pub object_identifier: RepositoryObjectIdentifier,
+    pub ref_name: RepositoryRefName,
+    pub commit_timestamp: RepositoryTimestamp,
+    pub message: RepositoryCommitMessage,
+    pub changed_files: Vec<RepositoryFileChange>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryPushObservation {
+    pub notification: RepositoryReceiveHookNotification,
+    pub commits: Vec<RepositoryCommitObservation>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct RepositoryRegistration {
     pub repository_name: RepositoryName,
     pub repository_class: RepositoryClass,
@@ -227,6 +309,76 @@ pub struct RepositoryEventListing {
 }
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryRecentRepositoriesQuery {
+    pub since_received_at: Option<RepositoryTimestamp>,
+    pub limit: RepositoryQueryLimit,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryRecentRepository {
+    pub repository_name: RepositoryName,
+    pub latest_received_at: RepositoryTimestamp,
+    pub latest_sequence: RepositoryEventSequence,
+    pub push_count: RepositoryQueryLimit,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryRecentRepositoriesListing {
+    pub repositories: Vec<RepositoryRecentRepository>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryChangedFileQuery {
+    pub repository_name: Option<RepositoryName>,
+    pub since_received_at: Option<RepositoryTimestamp>,
+    pub until_received_at: Option<RepositoryTimestamp>,
+    pub path_contains: Option<RepositoryTextSearch>,
+    pub limit: RepositoryQueryLimit,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryChangedFile {
+    pub repository_name: RepositoryName,
+    pub received_at: RepositoryTimestamp,
+    pub sequence: RepositoryEventSequence,
+    pub commit_object_identifier: RepositoryObjectIdentifier,
+    pub ref_name: RepositoryRefName,
+    pub status: RepositoryFileStatus,
+    pub path: RepositoryFilePath,
+    pub old_path: Option<RepositoryFilePath>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryChangedFileListing {
+    pub files: Vec<RepositoryChangedFile>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryCommitMessageQuery {
+    pub repository_name: Option<RepositoryName>,
+    pub since_received_at: Option<RepositoryTimestamp>,
+    pub until_received_at: Option<RepositoryTimestamp>,
+    pub message_contains: Option<RepositoryTextSearch>,
+    pub limit: RepositoryQueryLimit,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryCommit {
+    pub repository_name: RepositoryName,
+    pub received_at: RepositoryTimestamp,
+    pub sequence: RepositoryEventSequence,
+    pub object_identifier: RepositoryObjectIdentifier,
+    pub ref_name: RepositoryRefName,
+    pub commit_timestamp: RepositoryTimestamp,
+    pub message: RepositoryCommitMessage,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
+pub struct RepositoryCommitListing {
+    pub commits: Vec<RepositoryCommit>,
+}
+
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct RepositoryCatalogQuery;
 
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
@@ -251,7 +403,11 @@ nota_config::impl_rkyv_configuration!(RepositoryLedgerDaemonConfiguration);
 )]
 pub enum RepositoryLedgerOperationKind {
     RepositoryReceiveHookNotification,
+    RepositoryPushObservation,
     RepositoryEventQuery,
+    RepositoryRecentRepositoriesQuery,
+    RepositoryChangedFileQuery,
+    RepositoryCommitMessageQuery,
     RepositoryCatalogQuery,
 }
 
@@ -274,12 +430,19 @@ signal_channel! {
     channel RepositoryLedger {
         request RepositoryLedgerRequest {
             Assert RepositoryReceiveHookNotification(RepositoryReceiveHookNotification),
+            Assert RepositoryPushObservation(RepositoryPushObservation),
             Match RepositoryEventQuery(RepositoryEventQuery),
+            Match RepositoryRecentRepositoriesQuery(RepositoryRecentRepositoriesQuery),
+            Match RepositoryChangedFileQuery(RepositoryChangedFileQuery),
+            Match RepositoryCommitMessageQuery(RepositoryCommitMessageQuery),
             Match RepositoryCatalogQuery(RepositoryCatalogQuery),
         }
         reply RepositoryLedgerReply {
             RepositoryEventRecorded(RepositoryEventRecorded),
             RepositoryEventListing(RepositoryEventListing),
+            RepositoryRecentRepositoriesListing(RepositoryRecentRepositoriesListing),
+            RepositoryChangedFileListing(RepositoryChangedFileListing),
+            RepositoryCommitListing(RepositoryCommitListing),
             RepositoryCatalogListing(RepositoryCatalogListing),
             RepositoryLedgerRequestUnimplemented(RepositoryLedgerRequestUnimplemented),
         }
@@ -298,7 +461,19 @@ impl RepositoryLedgerRequest {
             Self::RepositoryReceiveHookNotification(_) => {
                 RepositoryLedgerOperationKind::RepositoryReceiveHookNotification
             }
+            Self::RepositoryPushObservation(_) => {
+                RepositoryLedgerOperationKind::RepositoryPushObservation
+            }
             Self::RepositoryEventQuery(_) => RepositoryLedgerOperationKind::RepositoryEventQuery,
+            Self::RepositoryRecentRepositoriesQuery(_) => {
+                RepositoryLedgerOperationKind::RepositoryRecentRepositoriesQuery
+            }
+            Self::RepositoryChangedFileQuery(_) => {
+                RepositoryLedgerOperationKind::RepositoryChangedFileQuery
+            }
+            Self::RepositoryCommitMessageQuery(_) => {
+                RepositoryLedgerOperationKind::RepositoryCommitMessageQuery
+            }
             Self::RepositoryCatalogQuery(_) => {
                 RepositoryLedgerOperationKind::RepositoryCatalogQuery
             }
