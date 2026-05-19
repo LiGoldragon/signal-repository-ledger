@@ -29,6 +29,16 @@ There is no public `Assert` / `Match` tag in this contract. The daemon
 executor lowers these contract-local operations to Sema effects when
 it mutates or reads its own durable tables.
 
+The public reply surface mirrors that tree:
+
+- `EventRecorded(EventRecorded)` — a receive/observe operation was
+  accepted and assigned a ledger sequence.
+- `QueryResult(QueryResult)` — a query returned one of the closed
+  result payloads: `Events`, `RecentRepositories`, `ChangedFiles`,
+  `Commits`, or `Catalog`.
+- `RequestUnimplemented(RequestUnimplemented)` — the daemon accepted
+  the contract shape but the runtime lacks that operation or query path.
+
 ## Owns
 
 - `ReceiveHookNotification`, matching the current Gitolite
@@ -40,6 +50,8 @@ it mutates or reads its own durable tables.
   daemon's ordinary socket, owner socket, store, and spool directory.
 - Closed `Query` payload for repository event and repository catalog
   reads.
+- Closed `QueryResult` payload for repository event and repository
+  catalog replies.
 - Read payloads for agent-facing discovery:
   `RecentRepositories`, `ChangedFiles`, and `CommitMessages`.
 - Ordinary operation/reply variants declared with `signal_channel!`.
@@ -60,6 +72,8 @@ it mutates or reads its own durable tables.
 - `Observe` introduces one push event plus zero or more commit/file
   observations when accepted by the daemon.
 - `Query` reads ledger state; the daemon decides the Sema read plan.
+- Query replies are grouped under `QueryResult`; individual `*Listing`
+  records are payload records, not public reply siblings.
 - Sema lowering belongs to the daemon executor, not this contract.
 - Query text matching is ordinary substring matching over typed fields. The
   first implementation is case-insensitive so agents can search commit messages
@@ -107,4 +121,11 @@ Agent discovery queries:
   None
   (Some "query surface")
   50))
+```
+
+Query result reply:
+
+```nota
+(QueryResult (RecentRepositories
+  [(RecentRepository "repository-ledger" "20260519T140736Z" 42 8)]))
 ```

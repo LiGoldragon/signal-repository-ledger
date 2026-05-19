@@ -407,6 +407,27 @@ impl Query {
     }
 }
 
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaSum, Debug, Clone, PartialEq, Eq)]
+pub enum QueryResult {
+    Events(EventListing),
+    RecentRepositories(RecentRepositoriesListing),
+    ChangedFiles(ChangedFileListing),
+    Commits(CommitListing),
+    Catalog(CatalogListing),
+}
+
+impl QueryResult {
+    pub fn kind(&self) -> QueryKind {
+        match self {
+            Self::Events(_) => QueryKind::Events,
+            Self::RecentRepositories(_) => QueryKind::RecentRepositories,
+            Self::ChangedFiles(_) => QueryKind::ChangedFiles,
+            Self::Commits(_) => QueryKind::CommitMessages,
+            Self::Catalog(_) => QueryKind::Catalog,
+        }
+    }
+}
+
 #[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaRecord, Debug, Clone, PartialEq, Eq)]
 pub struct DaemonConfiguration {
     pub ordinary_socket_path: FilesystemPath,
@@ -463,11 +484,7 @@ signal_channel! {
     }
     reply Reply {
         EventRecorded(EventRecorded),
-        EventListing(EventListing),
-        RecentRepositoriesListing(RecentRepositoriesListing),
-        ChangedFileListing(ChangedFileListing),
-        CommitListing(CommitListing),
-        CatalogListing(CatalogListing),
+        QueryResult(QueryResult),
         RequestUnimplemented(RequestUnimplemented),
     }
 }

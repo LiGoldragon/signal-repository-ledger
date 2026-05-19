@@ -1,7 +1,8 @@
 use signal_frame::RequestPayload;
 use signal_repository_ledger::{
-    Catalog, ChangedFiles, CommitMessages, DaemonConfiguration, Events, FilesystemPath, Name,
-    OperationKind, Query, QueryKind, QueryLimit, RecentRepositories, Request, SocketMode,
+    Catalog, ChangedFiles, CommitListing, CommitMessages, DaemonConfiguration, Events,
+    FilesystemPath, Name, OperationKind, Query, QueryKind, QueryLimit, QueryResult,
+    RecentRepositories, RecentRepositoriesListing, Reply, ReplyKind, Request, SocketMode,
     TextSearch, Timestamp,
 };
 
@@ -44,6 +45,9 @@ fn operations_are_contract_local_without_signal_verbs() {
         limit: QueryLimit::new(16),
     });
     assert_eq!(messages.kind(), QueryKind::CommitMessages);
+
+    let result = QueryResult::Commits(CommitListing { commits: vec![] });
+    assert_eq!(result.kind(), QueryKind::CommitMessages);
 }
 
 #[test]
@@ -67,6 +71,27 @@ fn query_operation_round_trips_through_nota() {
     let mut decoder = Decoder::new(&text);
     let decoded = Request::decode(&mut decoder).expect("decode");
     assert_eq!(decoded, operation);
+}
+
+#[test]
+fn query_result_reply_round_trips_through_nota() {
+    use nota_codec::{Decoder, Encoder, NotaDecode, NotaEncode};
+
+    let reply = Reply::QueryResult(QueryResult::RecentRepositories(RecentRepositoriesListing {
+        repositories: vec![],
+    }));
+
+    assert_eq!(reply.kind(), ReplyKind::QueryResult);
+
+    let mut encoder = Encoder::new();
+    reply.encode(&mut encoder).expect("encode");
+    let text = encoder.into_string();
+
+    assert_eq!(text, "(QueryResult (RecentRepositories ([])))");
+
+    let mut decoder = Decoder::new(&text);
+    let decoded = Reply::decode(&mut decoder).expect("decode");
+    assert_eq!(decoded, reply);
 }
 
 #[test]
