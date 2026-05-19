@@ -84,3 +84,7 @@ Agent discovery queries:
   (Some "query surface")
   50)
 ```
+
+These are the canonical record shapes. The current generated channel request
+CLI surface still accepts present optional fields as bare values; that is a
+`signal_channel!` syntax gap, not the contract's desired record grammar.
