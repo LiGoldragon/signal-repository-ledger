@@ -59,7 +59,10 @@ fn query_operation_round_trips_through_nota() {
     operation.encode(&mut encoder).expect("encode");
     let text = encoder.into_string();
 
-    assert_eq!(text, "(Query (RecentRepositories \"20260519T000000Z\" 16))");
+    assert_eq!(
+        text,
+        "(Query (RecentRepositories ((Some \"20260519T000000Z\") 16)))"
+    );
 
     let mut decoder = Decoder::new(&text);
     let decoded = Request::decode(&mut decoder).expect("decode");
@@ -71,7 +74,7 @@ fn query_operation_builds_single_signal_frame_request() {
     let operation = Request::Query(Query::Catalog(Catalog));
     let request = operation.into_request();
 
-    assert_eq!(request.operations().len(), 1);
+    assert_eq!(request.payloads().len(), 1);
 }
 
 #[test]

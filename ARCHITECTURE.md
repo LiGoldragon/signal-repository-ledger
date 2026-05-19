@@ -92,13 +92,13 @@ Direct push observation:
 Agent discovery queries:
 
 ```nota
-(Query (RecentRepositories "20260519T000000Z" 20))
+(Query (RecentRepositories (Some "20260519T000000Z") 20))
 
 (Query (ChangedFiles
-  "repository-ledger"
-  "20260519T000000Z"
-  "20260519T235959Z"
-  "src"
+  (Some "repository-ledger")
+  (Some "20260519T000000Z")
+  (Some "20260519T235959Z")
+  (Some "src")
   50))
 
 (Query (CommitMessages
