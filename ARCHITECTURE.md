@@ -8,13 +8,15 @@ notifications, submit direct push observations, or ask for repository
 ledger state. Privileged repository registration, hook policy, and
 mirror configuration live in `owner-signal-repository-ledger`.
 
-## Migration history — contract-local operations (2026-05-19)
+## Migration history — three-layer model (2026-05-19/2026-05-20)
 
 This crate is the pilot contract for the migration from public
-`signal-core` Sema verbs to `signal-frame` contract-local operation
-roots.
+`signal-core` Sema verbs to the three-layer model affirmed
+2026-05-20 (per
+`primary/reports/designer/246-v4-bundled-fix-deep-design-with-examples.md`
+and `primary/reports/designer/248-three-layer-changes-for-operators.md`).
 
-The public request surface is now:
+The public request surface (Layer 1) is now:
 
 - `Receive(ReceiveHookNotification)` — a Gitolite hook fallback spool
   notification reached the ordinary daemon.
@@ -26,8 +28,17 @@ The public request surface is now:
   and `Catalog`.
 
 There is no public `Assert` / `Match` tag in this contract. The daemon
-executor lowers these contract-local operations to Sema effects when
-it mutates or reads its own durable tables.
+owns its typed Component Commands (Layer 2 — e.g.
+`LedgerCommand::RecordEvent`, `LedgerCommand::ReadRecentRepositories`)
+and projects them to payloadless Sema class labels (Layer 3) for
+cross-component observation via `ToSemaOperation`. See
+`~/primary/skills/component-triad.md` §"Verbs come in three layers".
+
+Repository-ledger is **not** a persona component; the mandatory
+`Tap`/`Untap` observable block does not apply here. (Persona
+components reserve the standardized observability surface.) If a
+domain-specific observation channel lands later, it uses domain-named
+Subscribe/Retract pairs.
 
 The public reply surface mirrors that tree:
 
@@ -68,13 +79,16 @@ The public reply surface mirrors that tree:
 - Public operation roots are contract-local verbs. They do not expose
   `Assert`, `Mutate`, `Retract`, `Match`, `Subscribe`, or `Validate`.
 - `Receive` introduces a hook-notification fact when accepted by the
-  daemon.
+  daemon. (Daemon-side projection: Sema `Assert`.)
 - `Observe` introduces one push event plus zero or more commit/file
-  observations when accepted by the daemon.
-- `Query` reads ledger state; the daemon decides the Sema read plan.
+  observations when accepted by the daemon. (Daemon-side projection:
+  Sema `Assert`.)
+- `Query` reads ledger state; the daemon's `CommandExecutor` knows
+  the read plan. (Daemon-side projection: Sema `Match`.)
 - Query replies are grouped under `QueryResult`; individual `*Listing`
   records are payload records, not public reply siblings.
-- Sema lowering belongs to the daemon executor, not this contract.
+- Typed Component Commands and Sema-class projection belong to the
+  daemon, not this contract.
 - Query text matching is ordinary substring matching over typed fields. The
   first implementation is case-insensitive so agents can search commit messages
   without knowing exact capitalization.
