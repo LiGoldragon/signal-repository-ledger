@@ -103,37 +103,37 @@ Direct push observation:
 ```nota
 (Observe (PushObservation
   (ReceiveHookNotification
-    "repository-ledger"
-    "gitolite-admin"
-    "20260519T140736Z"
+    [repository-ledger]
+    [gitolite-admin]
+    [20260519T140736Z]
     true
-    [(RefUpdate "old-commit" "new-commit" "refs/heads/main")])
+    [(RefUpdate [old-commit] [new-commit] [refs/heads/main])])
   [(CommitObservation
-      "new-commit"
-      "refs/heads/main"
-      "2026-05-19T14:07:36+00:00"
-      "add repository query surface\n\nLonger commit message body."
-      [(FileChange "M" "src/lib.rs" None)
-       (FileChange "R100" "src/new.rs" "src/old.rs")])]))
+      [new-commit]
+      [refs/heads/main]
+      [2026-05-19T14:07:36+00:00]
+      [add repository query surface\n\nLonger commit message body.]
+      [(FileChange [M] [src/lib.rs] None)
+       (FileChange [R100] [src/new.rs] [src/old.rs])])]))
 ```
 
 Agent discovery queries:
 
 ```nota
-(Query (RecentRepositories (Some "20260519T000000Z") 20))
+(Query (RecentRepositories (Some [20260519T000000Z]) 20))
 
 (Query (ChangedFiles
-  (Some "repository-ledger")
-  (Some "20260519T000000Z")
-  (Some "20260519T235959Z")
-  (Some "src")
+  (Some [repository-ledger])
+  (Some [20260519T000000Z])
+  (Some [20260519T235959Z])
+  (Some [src])
   50))
 
 (Query (CommitMessages
   None
   None
   None
-  (Some "query surface")
+  (Some [query surface])
   50))
 ```
 
@@ -141,5 +141,5 @@ Query result reply:
 
 ```nota
 (QueryResult (RecentRepositories
-  [(RecentRepository "repository-ledger" "20260519T140736Z" 42 8)]))
+  [(RecentRepository [repository-ledger] [20260519T140736Z] 42 8)]))
 ```
