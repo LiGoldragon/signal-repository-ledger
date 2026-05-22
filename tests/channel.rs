@@ -62,7 +62,7 @@ fn query_operation_round_trips_through_nota() {
 
     assert_eq!(
         text,
-        "(Query (RecentRepositories ((Some \"20260519T000000Z\") 16)))"
+        "(Query (RecentRepositories ((Some [20260519T000000Z]) 16)))"
     );
 
     let mut decoder = Decoder::new(&text);
