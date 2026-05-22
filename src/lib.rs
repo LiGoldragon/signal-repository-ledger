@@ -3,7 +3,7 @@
 //! This crate carries peer-callable repository event submissions and read
 //! queries. Owner-only configuration lives in `owner-signal-repository-ledger`.
 
-use nota_codec::{NotaEnum, NotaRecord, NotaSum, NotaTransparent};
+use nota_codec::{NotaEnum, NotaRecord, NotaTransparent};
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
 use signal_frame::signal_channel;
 
@@ -386,7 +386,7 @@ pub struct CatalogListing {
     pub repositories: Vec<Registration>,
 }
 
-#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaSum, Debug, Clone, PartialEq, Eq)]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, PartialEq, Eq)]
 pub enum Query {
     Events(Events),
     RecentRepositories(RecentRepositories),
@@ -407,7 +407,7 @@ impl Query {
     }
 }
 
-#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaSum, Debug, Clone, PartialEq, Eq)]
+#[derive(Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, PartialEq, Eq)]
 pub enum QueryResult {
     Events(EventListing),
     RecentRepositories(RecentRepositoriesListing),
@@ -439,15 +439,6 @@ pub struct DaemonConfiguration {
 }
 
 nota_config::impl_rkyv_configuration!(DaemonConfiguration);
-
-#[derive(
-    Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, Copy, PartialEq, Eq, Hash,
-)]
-pub enum OperationKind {
-    Receive,
-    Observe,
-    Query,
-}
 
 #[derive(
     Archive, RkyvSerialize, RkyvDeserialize, NotaEnum, Debug, Clone, Copy, PartialEq, Eq, Hash,
@@ -489,19 +480,8 @@ signal_channel! {
     }
 }
 
-pub type Frame = LedgerFrame;
-pub type FrameBody = LedgerFrameBody;
-pub type ChannelRequest = LedgerChannelRequest;
-pub type ChannelReply = LedgerChannelReply;
-pub type RequestBuilder = LedgerRequestBuilder;
-pub type Request = LedgerOperation;
-
-impl LedgerOperation {
+impl Operation {
     pub fn operation_kind(&self) -> OperationKind {
-        match self {
-            Self::Receive(_) => OperationKind::Receive,
-            Self::Observe(_) => OperationKind::Observe,
-            Self::Query(_) => OperationKind::Query,
-        }
+        self.kind()
     }
 }

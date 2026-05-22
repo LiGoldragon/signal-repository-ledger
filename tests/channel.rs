@@ -1,23 +1,20 @@
 use signal_frame::RequestPayload;
 use signal_repository_ledger::{
     Catalog, ChangedFiles, CommitListing, CommitMessages, DaemonConfiguration, Events,
-    FilesystemPath, Name, OperationKind, Query, QueryKind, QueryLimit, QueryResult,
-    RecentRepositories, RecentRepositoriesListing, Reply, ReplyKind, Request, SocketMode,
-    TextSearch, Timestamp,
+    FilesystemPath, Name, Operation, OperationKind, Query, QueryKind, QueryLimit, QueryResult,
+    RecentRepositories, RecentRepositoriesListing, Reply, ReplyKind, SocketMode, TextSearch,
+    Timestamp,
 };
 
 #[test]
 fn operations_are_contract_local_without_signal_verbs() {
-    let query = Request::Query(Query::Events(Events {
+    let query = Operation::Query(Query::Events(Events {
         repository_name: Some(Name::new("repository-ledger")),
         since_sequence: None,
         limit: QueryLimit::new(16),
     }));
     assert_eq!(query.operation_kind(), OperationKind::Query);
-    assert_eq!(
-        query.kind(),
-        signal_repository_ledger::LedgerOperationKind::Query
-    );
+    assert_eq!(query.kind(), OperationKind::Query);
 
     let catalog = Query::Catalog(Catalog);
     assert_eq!(catalog.kind(), QueryKind::Catalog);
@@ -54,7 +51,7 @@ fn operations_are_contract_local_without_signal_verbs() {
 fn query_operation_round_trips_through_nota() {
     use nota_codec::{Decoder, Encoder, NotaDecode, NotaEncode};
 
-    let operation = Request::Query(Query::RecentRepositories(RecentRepositories {
+    let operation = Operation::Query(Query::RecentRepositories(RecentRepositories {
         since_received_at: Some(Timestamp::new("20260519T000000Z")),
         limit: QueryLimit::new(16),
     }));
@@ -69,7 +66,7 @@ fn query_operation_round_trips_through_nota() {
     );
 
     let mut decoder = Decoder::new(&text);
-    let decoded = Request::decode(&mut decoder).expect("decode");
+    let decoded = Operation::decode(&mut decoder).expect("decode");
     assert_eq!(decoded, operation);
 }
 
@@ -96,7 +93,7 @@ fn query_result_reply_round_trips_through_nota() {
 
 #[test]
 fn query_operation_builds_single_signal_frame_request() {
-    let operation = Request::Query(Query::Catalog(Catalog));
+    let operation = Operation::Query(Query::Catalog(Catalog));
     let request = operation.into_request();
 
     assert_eq!(request.payloads().len(), 1);
