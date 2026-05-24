@@ -143,3 +143,19 @@ Query result reply:
 (QueryResult (RecentRepositories
   [(RecentRepository [repository-ledger] [20260519T140736Z] 42 8)]))
 ```
+
+## Pending schema-engine upgrade
+
+**Status:** scheduled for migration to schema-language-based contract per `reports/designer/326-v13-spirit-complete-schema-vision.md` + `reports/designer/324-migration-mvp-spirit-handover-re-specification.md`.
+
+**Target:** this contract's hand-written `signal_channel!` invocation converts to a single `repository-ledger/repository-ledger.schema` file (shared with the repository-ledger daemon's repository). The brilliant macro library (`primary-ezqx.1`) reads the schema + emits this crate's wire types + ShortHeader projection + dispatcher binding + VersionProjection impls.
+
+**Sequence:** Spirit is the MVP pilot landing first via `primary-ezqx.1`; this contract's schema cutover follows after pilot succeeds. Repository-ledger has a paired `owner-signal-repository-ledger`; both legs of the policy-vs-working split appear in the shared `repository-ledger.schema` file per the schema-language's separation discipline.
+
+**Per-component concerns:** Query-heavy contract (the canonical examples above show `(Query …)` requests + `(QueryResult …)` replies); the schema-language must encode optional positional fields (`(Some …)` / `None`) per the canonical examples without losing the typed-variant discipline. No special blockers — straightforward cutover after pilot.
+
+**References:**
+- `reports/designer/326-v13-spirit-complete-schema-vision.md` — uniform header form + schema-language design
+- `reports/designer/324-migration-mvp-spirit-handover-re-specification.md` — migration MVP + handover state
+- `reports/designer/322-spirit-mvp-positional-schema-worked-example.md` — Spirit MVP worked example
+- `reports/operator/174-schema-import-header-design-critique-2026-05-24.md` — header/body/feature separation + lowering rules
