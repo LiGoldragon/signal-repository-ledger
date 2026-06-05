@@ -1,7 +1,7 @@
 //! Ordinary Signal contract for repository-ledger.
 //!
 //! This crate carries peer-callable repository event submissions and read
-//! queries. Owner-only configuration lives in `owner-signal-repository-ledger`.
+//! queries. Meta-signal configuration lives in `meta-signal-repository-ledger`.
 
 use nota_codec::{NotaEnum, NotaRecord, NotaTransparent};
 use rkyv::{Archive, Deserialize as RkyvDeserialize, Serialize as RkyvSerialize};
@@ -235,7 +235,7 @@ impl SocketMode {
 pub enum Class {
     RuntimeComponent,
     OrdinarySignalContract,
-    OwnerSignalContract,
+    MetaSignalContract,
     ReportLane,
     Configuration,
     Documentation,
@@ -432,8 +432,8 @@ impl QueryResult {
 pub struct DaemonConfiguration {
     pub ordinary_socket_path: FilesystemPath,
     pub ordinary_socket_mode: SocketMode,
-    pub owner_socket_path: FilesystemPath,
-    pub owner_socket_mode: SocketMode,
+    pub meta_socket_path: FilesystemPath,
+    pub meta_socket_mode: SocketMode,
     pub store_path: FilesystemPath,
     pub spool_directory: FilesystemPath,
 }

@@ -9,8 +9,8 @@ Companion to `ARCHITECTURE.md` and `Cargo.toml`. Maintenance: `primary/skills/re
 
 This file carries only the intent that is FOR this `signal-repository-ledger`
 contract. Workspace-shape intent stays in the primary workspace `primary/INTENT.md`.
-Component daemon intent stays in `repository-ledger/INTENT.md`. Owner-only policy
-stays in `owner-signal-repository-ledger`.
+Component daemon intent stays in `repository-ledger/INTENT.md`. Meta-signal policy
+stays in `meta-signal-repository-ledger`.
 
 ## Why this repo exists
 
@@ -19,7 +19,7 @@ repository-ledger component. It is called by trusted local peers that submit
 repository-receive notifications, submit direct push observations, or ask for
 repository-ledger state. The first slice covers Gitolite receive-hook
 notifications and basic read queries. Privileged repository registration, hook
-policy, and mirror configuration live in `owner-signal-repository-ledger`; the
+policy, and mirror configuration live in `meta-signal-repository-ledger`; the
 runtime store and lowering logic live in `repository-ledger`. This crate was the
 **pilot contract** for the migration from public `signal-core` Sema verbs to the
 three-layer model (2026-05-19/2026-05-20).
@@ -85,7 +85,7 @@ operation verbs":
 - The ledger sequence and event identity are minted by the daemon, never accepted
   from a caller payload.
 - Privileged repository registration, hook policy, and mirror configuration stay
-  in `owner-signal-repository-ledger`, not here.
+  in `meta-signal-repository-ledger`, not here.
 - The contract is scheduled for cutover to a schema-language source (per
   `reports/designer/326-v13` + `/324`); the wire surface it defines is the input
   to that cutover.
@@ -119,8 +119,8 @@ This crate does not own:
 - the ledger redb store, event tables, or repository indices;
 - socket binding, transport, or version handshake policy;
 - ledger reducers, hook spool processing, or registration logic;
-- owner-only repository registration, hook policy, or mirror configuration (that
-  is `owner-signal-repository-ledger`);
+- meta-signal repository registration, hook policy, or mirror configuration (that
+  is `meta-signal-repository-ledger`);
 - NOTA projection policy or surface (CLI formatting, audit wrapping).
 
 ## See also
@@ -129,7 +129,7 @@ This crate does not own:
   the pending schema-engine cutover, and closed-enum discipline.
 - `../repository-ledger/INTENT.md` — daemon-side intent (schema-driven planes,
   actors, state).
-- `../owner-signal-repository-ledger/INTENT.md` — owner-only repository-ledger
+- `../meta-signal-repository-ledger/INTENT.md` — meta-signal repository-ledger
   policy contract.
 - `primary/skills/contract-repo.md` — contract repo discipline and naming rules.
 - `primary/skills/component-triad.md` — repo triad structure and wire layers.

@@ -106,10 +106,8 @@ fn daemon_configuration_round_trips_through_nota() {
     let configuration = DaemonConfiguration {
         ordinary_socket_path: FilesystemPath::new("/run/repository-ledger/repository-ledger.sock"),
         ordinary_socket_mode: SocketMode::new(0o660),
-        owner_socket_path: FilesystemPath::new(
-            "/run/repository-ledger/repository-ledger-owner.sock",
-        ),
-        owner_socket_mode: SocketMode::new(0o600),
+        meta_socket_path: FilesystemPath::new("/run/repository-ledger/repository-ledger-meta.sock"),
+        meta_socket_mode: SocketMode::new(0o600),
         store_path: FilesystemPath::new("/var/lib/repository-ledger/repository-ledger.redb"),
         spool_directory: FilesystemPath::new("/var/lib/repository-ledger/spool"),
     };

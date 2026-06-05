@@ -6,7 +6,7 @@ submissions and read queries.
 It is called by trusted local peers that can submit repository-receive
 notifications, submit direct push observations, or ask for repository
 ledger state. Privileged repository registration, hook policy, and
-mirror configuration live in `owner-signal-repository-ledger`.
+mirror configuration live in `meta-signal-repository-ledger`.
 
 ## Migration history — three-layer model (2026-05-19/2026-05-20)
 
@@ -58,7 +58,7 @@ The public reply surface mirrors that tree:
   wraps the push notification plus per-commit observations and per-file changes.
 - Repository/ref identity newtypes.
 - `DaemonConfiguration`, the typed startup record for the
-  daemon's ordinary socket, owner socket, store, and spool directory.
+  daemon's ordinary socket, meta socket, store, and spool directory.
 - Closed `Query` payload for repository event and repository catalog
   reads.
 - Closed `QueryResult` payload for repository event and repository
@@ -70,7 +70,7 @@ The public reply surface mirrors that tree:
 ## Does Not Own
 
 - The daemon, socket listeners, actors, or sema-engine storage.
-- Owner-only policy/configuration mutation.
+- Meta-signal policy/configuration mutation.
 - Gitolite server installation.
 - GitHub mirroring.
 
@@ -150,7 +150,7 @@ Query result reply:
 
 **Target:** this contract's hand-written `signal_channel!` invocation converts to a single `repository-ledger/repository-ledger.schema` file (shared with the repository-ledger daemon's repository). The brilliant macro library (`primary-ezqx.1`) reads the schema + emits this crate's wire types + ShortHeader projection + dispatcher binding + VersionProjection impls.
 
-**Sequence:** Spirit is the MVP pilot landing first via `primary-ezqx.1`; this contract's schema cutover follows after pilot succeeds. Repository-ledger has a paired `owner-signal-repository-ledger`; both legs of the policy-vs-working split appear in the shared `repository-ledger.schema` file per the schema-language's separation discipline.
+**Sequence:** Spirit is the MVP pilot landing first via `primary-ezqx.1`; this contract's schema cutover follows after pilot succeeds. Repository-ledger has a paired `meta-signal-repository-ledger`; both legs of the policy-vs-working split appear in the shared `repository-ledger.schema` file per the schema-language's separation discipline.
 
 **Per-component concerns:** Query-heavy contract (the canonical examples above show `(Query …)` requests + `(QueryResult …)` replies); the schema-language must encode optional positional fields (`(Some …)` / `None`) per the canonical examples without losing the typed-variant discipline. No special blockers — straightforward cutover after pilot.
 
