@@ -49,30 +49,27 @@ fn operations_are_contract_local_without_signal_verbs() {
 
 #[test]
 fn query_operation_round_trips_through_nota() {
-    use nota_codec::{Decoder, Encoder, NotaDecode, NotaEncode};
+    use nota_next::{NotaEncode, NotaSource};
 
     let operation = Operation::Query(Query::RecentRepositories(RecentRepositories {
         since_received_at: Some(Timestamp::new("20260519T000000Z")),
         limit: QueryLimit::new(16),
     }));
 
-    let mut encoder = Encoder::new();
-    operation.encode(&mut encoder).expect("encode");
-    let text = encoder.into_string();
+    let text = operation.to_nota();
 
     assert_eq!(
         text,
         "(Query (RecentRepositories ((Some [20260519T000000Z]) 16)))"
     );
 
-    let mut decoder = Decoder::new(&text);
-    let decoded = Operation::decode(&mut decoder).expect("decode");
+    let decoded = NotaSource::new(&text).parse::<Operation>().expect("decode");
     assert_eq!(decoded, operation);
 }
 
 #[test]
 fn query_result_reply_round_trips_through_nota() {
-    use nota_codec::{Decoder, Encoder, NotaDecode, NotaEncode};
+    use nota_next::{NotaEncode, NotaSource};
 
     let reply = Reply::QueryResult(QueryResult::RecentRepositories(RecentRepositoriesListing {
         repositories: vec![],
@@ -80,14 +77,11 @@ fn query_result_reply_round_trips_through_nota() {
 
     assert_eq!(reply.kind(), ReplyKind::QueryResult);
 
-    let mut encoder = Encoder::new();
-    reply.encode(&mut encoder).expect("encode");
-    let text = encoder.into_string();
+    let text = reply.to_nota();
 
     assert_eq!(text, "(QueryResult (RecentRepositories ([])))");
 
-    let mut decoder = Decoder::new(&text);
-    let decoded = Reply::decode(&mut decoder).expect("decode");
+    let decoded = NotaSource::new(&text).parse::<Reply>().expect("decode");
     assert_eq!(decoded, reply);
 }
 
@@ -101,7 +95,7 @@ fn query_operation_builds_single_signal_frame_request() {
 
 #[test]
 fn daemon_configuration_round_trips_through_nota() {
-    use nota_codec::{Decoder, Encoder, NotaDecode, NotaEncode};
+    use nota_next::{NotaEncode, NotaSource};
 
     let configuration = DaemonConfiguration {
         ordinary_socket_path: FilesystemPath::new("/run/repository-ledger/repository-ledger.sock"),
@@ -112,10 +106,9 @@ fn daemon_configuration_round_trips_through_nota() {
         spool_directory: FilesystemPath::new("/var/lib/repository-ledger/spool"),
     };
 
-    let mut encoder = Encoder::new();
-    configuration.encode(&mut encoder).expect("encode");
-    let text = encoder.into_string();
-    let mut decoder = Decoder::new(&text);
-    let decoded = DaemonConfiguration::decode(&mut decoder).expect("decode");
+    let text = configuration.to_nota();
+    let decoded = NotaSource::new(&text)
+        .parse::<DaemonConfiguration>()
+        .expect("decode");
     assert_eq!(decoded, configuration);
 }
