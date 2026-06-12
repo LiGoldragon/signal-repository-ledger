@@ -62,6 +62,22 @@
             }
           );
 
+          test-nota-text = craneLib.cargoTest (
+            commonArgs
+            // {
+              inherit cargoArtifacts;
+              cargoTestExtraArgs = "--features nota-text --all-targets";
+            }
+          );
+
+          clippy-nota-text = craneLib.cargoClippy (
+            commonArgs
+            // {
+              inherit cargoArtifacts;
+              cargoClippyExtraArgs = "--features nota-text --all-targets -- -D warnings";
+            }
+          );
+
           fmt = craneLib.cargoFmt {
             inherit src;
           };

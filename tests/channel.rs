@@ -48,6 +48,21 @@ fn operations_are_contract_local_without_signal_verbs() {
 }
 
 #[test]
+fn operation_kind_round_trips_through_nota() {
+    use nota_next::{NotaEncode, NotaSource};
+
+    let text = OperationKind::Query.to_nota();
+
+    assert_eq!(text, "Query");
+    assert_eq!(
+        NotaSource::new(&text)
+            .parse::<OperationKind>()
+            .expect("decode operation kind"),
+        OperationKind::Query
+    );
+}
+
+#[test]
 fn query_operation_round_trips_through_nota() {
     use nota_next::{NotaEncode, NotaSource};
 
@@ -60,7 +75,7 @@ fn query_operation_round_trips_through_nota() {
 
     assert_eq!(
         text,
-        "(Query (RecentRepositories ((Some [20260519T000000Z]) 16)))"
+        "(Query (RecentRepositories ((Some 20260519T000000Z) 16)))"
     );
 
     let decoded = NotaSource::new(&text).parse::<Operation>().expect("decode");

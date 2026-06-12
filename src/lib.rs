@@ -658,6 +658,48 @@ signal_channel! {
     }
 }
 
+#[cfg(not(feature = "nota-text"))]
+impl OperationKind {
+    const fn as_nota_atom(self) -> &'static str {
+        match self {
+            Self::Receive => "Receive",
+            Self::Observe => "Observe",
+            Self::Query => "Query",
+        }
+    }
+
+    fn from_nota_atom(atom: &str) -> Result<Self, NotaDecodeError> {
+        match atom {
+            "Receive" => Ok(Self::Receive),
+            "Observe" => Ok(Self::Observe),
+            "Query" => Ok(Self::Query),
+            variant => Err(NotaDecodeError::UnknownVariant {
+                enum_name: "OperationKind",
+                variant: variant.to_owned(),
+            }),
+        }
+    }
+}
+
+#[cfg(not(feature = "nota-text"))]
+impl NotaEncode for OperationKind {
+    fn to_nota(&self) -> String {
+        self.as_nota_atom().to_owned()
+    }
+}
+
+#[cfg(not(feature = "nota-text"))]
+impl NotaDecode for OperationKind {
+    fn from_nota_block(block: &Block) -> Result<Self, NotaDecodeError> {
+        let atom = block
+            .demote_to_string()
+            .ok_or(NotaDecodeError::ExpectedAtom {
+                type_name: "OperationKind",
+            })?;
+        Self::from_nota_atom(atom)
+    }
+}
+
 impl Operation {
     pub fn operation_kind(&self) -> OperationKind {
         self.kind()
