@@ -8,6 +8,14 @@ notifications, submit direct push observations, or ask for repository
 ledger state. Privileged repository registration, hook policy, and
 mirror configuration live in `meta-signal-repository-ledger`.
 
+## Direction
+
+`signal-repository-ledger` is the **ordinary peer-callable wire contract** for the `repository-ledger` component. Trusted local peers submit repository receive-hook events and push observations, or query ledger state. Privileged operations — repository registration, hook policy, mirror configuration — live in `meta-signal-repository-ledger`.
+
+This crate was the **pilot contract** for the migration from public `signal-core` Sema verbs to the three-layer model (2026-05-19/2026-05-20). Wire vocabulary is contract-local: `Receive`, `Observe`, and `Query` replace public Sema verb roots; the daemon lowers these into component commands and Sema class labels internally. `repository-ledger` is not a persona component; the mandatory `Tap`/`Untap` observable surface does not apply.
+
+The contract is scheduled for cutover to schema-language-based generation after the Spirit MVP pilot (`primary-ezqx.1`) succeeds.
+
 ## Migration history — three-layer model (2026-05-19/2026-05-20)
 
 This crate is the pilot contract for the migration from public
