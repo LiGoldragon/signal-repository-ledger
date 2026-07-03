@@ -49,7 +49,7 @@ fn operations_are_contract_local_without_signal_verbs() {
 
 #[test]
 fn operation_kind_round_trips_through_nota() {
-    use nota_next::{NotaEncode, NotaSource};
+    use nota::{NotaEncode, NotaSource};
 
     let text = OperationKind::Query.to_nota();
 
@@ -64,7 +64,7 @@ fn operation_kind_round_trips_through_nota() {
 
 #[test]
 fn query_operation_round_trips_through_nota() {
-    use nota_next::{NotaEncode, NotaSource};
+    use nota::{NotaEncode, NotaSource};
 
     let operation = Operation::Query(Query::RecentRepositories(RecentRepositories {
         since_received_at: Some(Timestamp::new("20260519T000000Z")),
@@ -84,7 +84,7 @@ fn query_operation_round_trips_through_nota() {
 
 #[test]
 fn query_result_reply_round_trips_through_nota() {
-    use nota_next::{NotaEncode, NotaSource};
+    use nota::{NotaEncode, NotaSource};
 
     let reply = Reply::QueryResult(QueryResult::RecentRepositories(RecentRepositoriesListing {
         repositories: vec![],
@@ -110,7 +110,7 @@ fn query_operation_builds_single_signal_frame_request() {
 
 #[test]
 fn daemon_configuration_round_trips_through_nota() {
-    use nota_next::{NotaEncode, NotaSource};
+    use nota::{NotaEncode, NotaSource};
 
     let configuration = DaemonConfiguration {
         ordinary_socket_path: FilesystemPath::new("/run/repository-ledger/repository-ledger.sock"),
