@@ -1,8 +1,5 @@
-# signal-repository-ledger — Agent Instructions
+## Protos estate status
 
-This repository is a pure Signal contract crate. It declares the ordinary
-repository-ledger wire vocabulary and contains no daemon, storage, actors, or
-runtime policy.
-
-Do not add privileged configuration variants here. Meta-signal authority belongs
-in `meta-signal-repository-ledger`.
+Stack: correct-new destination
+Status: active component contract, current checkout legacy-wired
+This checkout is not proof of correct-new adoption.
