@@ -27,10 +27,7 @@ pub type QueryLimit = i64;
 pub type SocketMode = i64;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum OperationKind {
     Receive,
     Observe,
@@ -38,10 +35,7 @@ pub enum OperationKind {
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum QueryKind {
     Events,
     RecentRepositories,
@@ -51,10 +45,7 @@ pub enum QueryKind {
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum UnimplementedReason {
     DaemonSocketMissing,
     StoreUnavailable,
@@ -62,10 +53,7 @@ pub enum UnimplementedReason {
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Class {
     RuntimeComponent,
     OrdinarySignalContract,
@@ -80,10 +68,7 @@ pub type OldObjectIdentifier = ObjectIdentifier;
 pub type NewObjectIdentifier = ObjectIdentifier;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct RefUpdate {
     pub old_object_identifier: OldObjectIdentifier,
     pub new_object_identifier: NewObjectIdentifier,
@@ -99,10 +84,7 @@ pub type ReceivedAt = Timestamp;
 pub type DaemonSocketPresent = bool;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ReceiveHookNotification {
     pub repository_name: RepositoryName,
     pub gitolite_user: GitoliteUser,
@@ -114,10 +96,7 @@ pub struct ReceiveHookNotification {
 pub type OldFilePath = std::option::Option<FilePath>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct FileChange {
     pub file_status: FileStatus,
     pub file_path: FilePath,
@@ -129,10 +108,7 @@ pub type FileChanges = std::vec::Vec<FileChange>;
 pub type CommitTimestamp = Timestamp;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct CommitObservation {
     pub object_identifier: ObjectIdentifier,
     pub ref_name: RefName,
@@ -144,10 +120,7 @@ pub struct CommitObservation {
 pub type CommitObservations = std::vec::Vec<CommitObservation>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct PushObservation {
     pub receive_hook_notification: ReceiveHookNotification,
     pub commit_observations: CommitObservations,
@@ -156,10 +129,7 @@ pub struct PushObservation {
 pub type RepositoryClass = Class;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Registration {
     pub repository_name: RepositoryName,
     pub repository_class: RepositoryClass,
@@ -168,10 +138,7 @@ pub struct Registration {
 pub type Registrations = std::vec::Vec<Registration>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Event {
     pub event_sequence: EventSequence,
     pub receive_hook_notification: ReceiveHookNotification,
@@ -180,10 +147,7 @@ pub struct Event {
 pub type EventRecords = std::vec::Vec<Event>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct EventRecorded {
     pub event_sequence: EventSequence,
 }
@@ -193,10 +157,7 @@ pub type SelectedRepositoryName = std::option::Option<Name>;
 pub type SinceSequence = std::option::Option<EventSequence>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct EventsQuery {
     pub selected_repository_name: SelectedRepositoryName,
     pub since_sequence: SinceSequence,
@@ -204,10 +165,7 @@ pub struct EventsQuery {
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct EventListing {
     pub event_records: EventRecords,
 }
@@ -217,10 +175,7 @@ pub type SinceReceivedAt = std::option::Option<Timestamp>;
 pub type UntilReceivedAt = std::option::Option<Timestamp>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct RecentRepositoriesQuery {
     pub since_received_at: SinceReceivedAt,
     pub query_limit: QueryLimit,
@@ -233,10 +188,7 @@ pub type LatestSequence = EventSequence;
 pub type PushCount = QueryLimit;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct RecentRepository {
     pub repository_name: RepositoryName,
     pub latest_received_at: LatestReceivedAt,
@@ -247,10 +199,7 @@ pub struct RecentRepository {
 pub type RecentRepositoryRecords = std::vec::Vec<RecentRepository>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct RecentRepositoriesListing {
     pub recent_repository_records: RecentRepositoryRecords,
 }
@@ -258,10 +207,7 @@ pub struct RecentRepositoriesListing {
 pub type PathContains = std::option::Option<TextSearch>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ChangedFilesQuery {
     pub selected_repository_name: SelectedRepositoryName,
     pub since_received_at: SinceReceivedAt,
@@ -273,10 +219,7 @@ pub struct ChangedFilesQuery {
 pub type CommitObjectIdentifier = ObjectIdentifier;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ChangedFile {
     pub repository_name: RepositoryName,
     pub received_at: ReceivedAt,
@@ -291,10 +234,7 @@ pub struct ChangedFile {
 pub type ChangedFileRecords = std::vec::Vec<ChangedFile>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct ChangedFileListing {
     pub changed_file_records: ChangedFileRecords,
 }
@@ -302,10 +242,7 @@ pub struct ChangedFileListing {
 pub type MessageContains = std::option::Option<TextSearch>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct CommitMessagesQuery {
     pub selected_repository_name: SelectedRepositoryName,
     pub since_received_at: SinceReceivedAt,
@@ -315,10 +252,7 @@ pub struct CommitMessagesQuery {
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct Commit {
     pub repository_name: RepositoryName,
     pub received_at: ReceivedAt,
@@ -332,28 +266,19 @@ pub struct Commit {
 pub type CommitRecords = std::vec::Vec<Commit>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct CommitListing {
     pub commit_records: CommitRecords,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct CatalogListing {
     pub registrations: Registrations,
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum LedgerQuery {
     Events(EventsQuery),
     RecentRepositories(RecentRepositoriesQuery),
@@ -363,10 +288,7 @@ pub enum LedgerQuery {
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum QueryResult {
     Events(EventListing),
     RecentRepositories(RecentRepositoriesListing),
@@ -378,10 +300,7 @@ pub enum QueryResult {
 pub type SelectedQueryKind = std::option::Option<QueryKind>;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct RequestUnimplemented {
     pub operation_kind: OperationKind,
     pub selected_query_kind: SelectedQueryKind,
@@ -401,10 +320,7 @@ pub type StorePath = FilesystemPath;
 pub type SpoolDirectory = FilesystemPath;
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub struct DaemonConfiguration {
     pub ordinary_socket_path: OrdinarySocketPath,
     pub ordinary_socket_mode: OrdinarySocketMode,
@@ -415,10 +331,7 @@ pub struct DaemonConfiguration {
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Query {
     Receive(ReceiveHookNotification),
     Observe(PushObservation),
@@ -426,10 +339,7 @@ pub enum Query {
 }
 #[rustfmt::skip]
 #[derive(rkyv::Archive, rkyv::Serialize, rkyv::Deserialize, Clone, Debug, PartialEq)]
-#[cfg_attr(
-    feature = "datom",
-    derive(datom_codec::Datomizable, datom_codec::Compositional)
-)]
+#[cfg_attr(feature = "datom", derive(datom_codec::Datomizable, datom_codec::Composing))]
 pub enum Response {
     EventRecorded(EventRecorded),
     QueryResult(QueryResult),
