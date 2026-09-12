@@ -1,0 +1,122 @@
+; The ordinary repository-ledger Signal contract.
+;
+; Peer-callable repository event submissions and bounded read queries over the
+; repository ledger. Meta configuration lives in meta-signal-repository-ledger.
+;
+; The query family is carried as one nested request so that the three
+; operations of the ledger — receive, observe, query — keep the arity the
+; hand-written contract had. QueryKind's heads are the wire-facing names of
+; that family, so no declared type may spell one of them.
+Signal
+[]
+[ Receive.ReceiveHookNotification
+  Observe.PushObservation
+  Query.LedgerQuery ]
+[ EventRecorded.EventRecorded
+  QueryResult.QueryResult
+  RequestUnimplemented.RequestUnimplemented ]
+[ Name.String
+  GitoliteUser.String
+  ObjectIdentifier.String
+  RefName.String
+  Timestamp.String
+  CommitMessage.String
+  FilePath.String
+  FileStatus.String
+  TextSearch.String
+  FilesystemPath.String
+
+  EventSequence.Integer
+  QueryLimit.Integer
+  SocketMode.Integer
+
+  OperationKind.[ Receive Observe Query ]
+  QueryKind.[ Events RecentRepositories ChangedFiles CommitMessages Catalog ]
+  UnimplementedReason.[ DaemonSocketMissing StoreUnavailable NotInPrototypeScope ]
+  Class.[ RuntimeComponent OrdinarySignalContract MetaSignalContract
+          ReportLane Configuration Documentation ]
+
+  OldObjectIdentifier.ObjectIdentifier
+  NewObjectIdentifier.ObjectIdentifier
+  RefUpdate.{ OldObjectIdentifier NewObjectIdentifier RefName }
+  RefUpdates.Vector<RefUpdate>
+
+  RepositoryName.Name
+  ReceivedAt.Timestamp
+  DaemonSocketPresent.Boolean
+  ReceiveHookNotification.{ RepositoryName GitoliteUser ReceivedAt
+                            DaemonSocketPresent RefUpdates }
+
+  OldFilePath.Option<FilePath>
+  FileChange.{ FileStatus FilePath OldFilePath }
+  FileChanges.Vector<FileChange>
+
+  CommitTimestamp.Timestamp
+  CommitObservation.{ ObjectIdentifier RefName CommitTimestamp CommitMessage FileChanges }
+  CommitObservations.Vector<CommitObservation>
+  PushObservation.{ ReceiveHookNotification CommitObservations }
+
+  RepositoryClass.Class
+  Registration.{ RepositoryName RepositoryClass }
+  Registrations.Vector<Registration>
+
+  Event.{ EventSequence ReceiveHookNotification }
+  EventRecords.Vector<Event>
+  EventRecorded.{ EventSequence }
+
+  SelectedRepositoryName.Option<Name>
+  SinceSequence.Option<EventSequence>
+  EventsQuery.{ SelectedRepositoryName SinceSequence QueryLimit }
+  EventListing.{ EventRecords }
+
+  SinceReceivedAt.Option<Timestamp>
+  UntilReceivedAt.Option<Timestamp>
+  RecentRepositoriesQuery.{ SinceReceivedAt QueryLimit }
+  LatestReceivedAt.Timestamp
+  LatestSequence.EventSequence
+  PushCount.QueryLimit
+  RecentRepository.{ RepositoryName LatestReceivedAt LatestSequence PushCount }
+  RecentRepositoryRecords.Vector<RecentRepository>
+  RecentRepositoriesListing.{ RecentRepositoryRecords }
+
+  PathContains.Option<TextSearch>
+  ChangedFilesQuery.{ SelectedRepositoryName SinceReceivedAt UntilReceivedAt
+                      PathContains QueryLimit }
+  CommitObjectIdentifier.ObjectIdentifier
+  ChangedFile.{ RepositoryName ReceivedAt EventSequence CommitObjectIdentifier
+                RefName FileStatus FilePath OldFilePath }
+  ChangedFileRecords.Vector<ChangedFile>
+  ChangedFileListing.{ ChangedFileRecords }
+
+  MessageContains.Option<TextSearch>
+  CommitMessagesQuery.{ SelectedRepositoryName SinceReceivedAt UntilReceivedAt
+                        MessageContains QueryLimit }
+  Commit.{ RepositoryName ReceivedAt EventSequence ObjectIdentifier RefName
+           CommitTimestamp CommitMessage }
+  CommitRecords.Vector<Commit>
+  CommitListing.{ CommitRecords }
+
+  CatalogListing.{ Registrations }
+
+  LedgerQuery.[ Events.EventsQuery
+                RecentRepositories.RecentRepositoriesQuery
+                ChangedFiles.ChangedFilesQuery
+                CommitMessages.CommitMessagesQuery
+                Catalog ]
+  QueryResult.[ Events.EventListing
+                RecentRepositories.RecentRepositoriesListing
+                ChangedFiles.ChangedFileListing
+                Commits.CommitListing
+                Catalog.CatalogListing ]
+
+  SelectedQueryKind.Option<QueryKind>
+  RequestUnimplemented.{ OperationKind SelectedQueryKind UnimplementedReason }
+
+  OrdinarySocketPath.FilesystemPath
+  OrdinarySocketMode.SocketMode
+  MetaSocketPath.FilesystemPath
+  MetaSocketMode.SocketMode
+  StorePath.FilesystemPath
+  SpoolDirectory.FilesystemPath
+  DaemonConfiguration.{ OrdinarySocketPath OrdinarySocketMode MetaSocketPath
+                        MetaSocketMode StorePath SpoolDirectory } ]

@@ -1,0 +1,19 @@
+; Canonical Datom text for the ordinary repository-ledger contract.
+; Every line was emitted by the codec that reads it back, and
+; tests/generated_contract.rs actualizes each one. The first seven
+; lines are requests; the rest are replies.
+
+Receive.{ repository-ledger gitolite-admin 20260519T120000Z False [ { 0000000000000000000000000000000000000000 1111111111111111111111111111111111111111 refs/heads/main } ] }
+Observe.{ { repository-ledger gitolite-admin 20260519T120000Z False [ { 0000000000000000000000000000000000000000 1111111111111111111111111111111111111111 refs/heads/main } ] } [ { aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa refs/heads/main 20260519T115900Z «record the ledger» [ { R src/lib.rs Some.src/old.rs } ] } ] }
+Query.Events.{ Some.repository-ledger Some.3 10 }
+Query.RecentRepositories.{ None 5 }
+Query.ChangedFiles.{ None Some.20260519T000000Z None Some.src/ 25 }
+Query.CommitMessages.{ None None None Some.ledger 25 }
+Query.Catalog
+EventRecorded.{ 42 }
+QueryResult.Events.{ [ { 1 { repository-ledger gitolite-admin 20260519T120000Z False [ { 0000000000000000000000000000000000000000 1111111111111111111111111111111111111111 refs/heads/main } ] } } ] }
+QueryResult.RecentRepositories.{ [ { repository-ledger 20260519T120000Z 7 3 } ] }
+QueryResult.ChangedFiles.{ [ { repository-ledger 20260519T120000Z 7 bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb refs/heads/main M src/lib.rs None } ] }
+QueryResult.Commits.{ [ { repository-ledger 20260519T120000Z 7 cccccccccccccccccccccccccccccccccccccccc refs/heads/main 20260519T115900Z «record the ledger» } ] }
+QueryResult.Catalog.{ [ { repository-ledger RuntimeComponent } ] }
+RequestUnimplemented.{ Query Some.Catalog DaemonSocketMissing }
